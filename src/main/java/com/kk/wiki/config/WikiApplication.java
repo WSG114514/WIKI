@@ -1,12 +1,16 @@
-package com.kk.wiki;
+package com.kk.wiki.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.env.Environment;
 
 @SpringBootApplication
+//手动设置spring扫描范围
+@ComponentScan("com.kk.wiki")
+//可设置多个包例如：@ComponentScan({"com.kk.wiki", "com.test"})
 public class WikiApplication {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WikiApplication.class);
