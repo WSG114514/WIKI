@@ -8,6 +8,8 @@ import com.kk.wiki.resp.EbookResp;
 import com.kk.wiki.utils.CopyUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -24,7 +26,10 @@ public class EbookService {
         EbookExample ebookExample = new EbookExample();
         //createCriteria 相当于创建一个where条件
         EbookExample.Criteria criteria = ebookExample.createCriteria();
-        criteria.andNameLike("%" + req.getName() + "%");
+
+        if(!ObjectUtils.isEmpty(req.getName())) {
+            criteria.andNameLike("%" + req.getName() + "%");
+        }
 
         List<Ebook> ebookList = ebookMapper.selectByExample(ebookExample);
 
