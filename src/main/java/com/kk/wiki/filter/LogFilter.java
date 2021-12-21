@@ -30,14 +30,14 @@ public class LogFilter implements Filter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
-        LOG.info("---------------------------LOG开始-----------------------------");
+        LOG.info("---------------------------Filter开始-----------------------------");
         LOG.info("请求地址：{} {}", request.getRequestURL().toString(), request.getMethod());
         LOG.info("远程地址：{}", request.getRemoteAddr());
 
         long startTime = System.currentTimeMillis();
         filterChain.doFilter(servletRequest, servletResponse);
         long endTime = System.currentTimeMillis();
-        LOG.info("---------------------------LOG结束--耗时：{}ms------------------", endTime - startTime);
+        LOG.info("---------------------------Filter结束--耗时：{}ms------------------", endTime - startTime);
     }
 
     @Override
