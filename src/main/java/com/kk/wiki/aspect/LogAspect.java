@@ -30,7 +30,7 @@ public class LogAspect {
     @Pointcut("execution(public * com.kk.*.controller.*Controller.*(..))")
     public void controllerPointcut() {}
 
-    @Before("controllerPointcut")
+    @Before("controllerPointcut()")
     public void doBefore(JoinPoint joinPoint) throws Throwable {
 
         // 开始打印请求日志
