@@ -1,5 +1,6 @@
 package com.kk.wiki.service;
 
+import com.github.pagehelper.PageHelper;
 import com.kk.wiki.domain.Ebook;
 import com.kk.wiki.domain.EbookExample;
 import com.kk.wiki.mapper.EbookMapper;
@@ -23,6 +24,8 @@ public class EbookService {
 
     public List<EbookResp> list(EbookReq req) {
 
+        //PageHelper在查詢一次后就會失效**** （）
+        PageHelper.startPage(2, 3);
         EbookExample ebookExample = new EbookExample();
         //createCriteria 相当于创建一个where条件
         EbookExample.Criteria criteria = ebookExample.createCriteria();
