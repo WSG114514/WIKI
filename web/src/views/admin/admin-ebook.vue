@@ -1,54 +1,9 @@
 <template>
   <a-layout>
-    <a-layout-sider width="200" style="background: #fff">
-      <a-menu
-          mode="inline"
-          v-model:selectedKeys="selectedKeys2"
-          v-model:openKeys="openKeys"
-          :style="{ height: '100%', borderRight: 0 }"
-      >
-        <a-sub-menu key="sub1">
-          <template #title>
-              <span>
-                <user-outlined />
-                subnav 1
-              </span>
-          </template>
-          <a-menu-item key="1">option1</a-menu-item>
-          <a-menu-item key="2">option2</a-menu-item>
-          <a-menu-item key="3">option3</a-menu-item>
-          <a-menu-item key="4">option4</a-menu-item>
-        </a-sub-menu>
-        <a-sub-menu key="sub2">
-          <template #title>
-              <span>
-                <laptop-outlined />
-                subnav 2
-              </span>
-          </template>
-          <a-menu-item key="5">option5</a-menu-item>
-          <a-menu-item key="6">option6</a-menu-item>
-          <a-menu-item key="7">option7</a-menu-item>
-          <a-menu-item key="8">option8</a-menu-item>
-        </a-sub-menu>
-        <a-sub-menu key="sub3">
-          <template #title>
-              <span>
-                <notification-outlined />
-                subnav 3
-              </span>
-          </template>
-          <a-menu-item key="9">option9</a-menu-item>
-          <a-menu-item key="10">option10</a-menu-item>
-          <a-menu-item key="11">option11</a-menu-item>
-          <a-menu-item key="12">option12</a-menu-item>
-        </a-sub-menu>
-      </a-menu>
-    </a-layout-sider>
     <a-layout-content :style="{ background: '#fff', padding: '24px', margin: 0, minHeight: '280px' }">
       <a-table
           :columns="columns"
-          :data-source="ebook"
+          :data-source="ebooks"
           :row-key="record => record.id"
           :pagination="pagination"
           :loading="loading"
@@ -82,7 +37,7 @@ export default defineComponent({
     const ebooks = ref();
     const pagination = ref({
       current: 1,
-      pageSize: 2,
+      pageSize: 4,
       total: 0
     });
     const loading = ref(false);
@@ -92,6 +47,11 @@ export default defineComponent({
         title: '封面',
         dataIndex: 'cover',
         slots: { customRender: 'cover'}
+      },
+      {
+        title: '名称',
+        key: 'name',
+        dataIndex: 'name',
       },
       {
         title: '分类1',
@@ -125,14 +85,20 @@ export default defineComponent({
     /**
      * 数据查询
      */
-    const handleQuery = (params: any) => {
+    const handleQuery = (p: any) => {
       loading.value = true;
-      axios.get("/ebook/list", params).then((response) => {
+      axios.get("/ebook/list", {
+        params: {
+          page: p.page,
+          size: p.size
+        }
+      }).then((response) => {
         loading.value = false;
-        ebooks.value = response.data;
+        ebooks.value = response.data.content.list;
 
         //重置分页配置
-        pagination.value.current = params.page;
+        pagination.value.current = p.page;
+        pagination.value.total = response.data.content.total;
       });
     }
 
@@ -148,7 +114,10 @@ export default defineComponent({
     }
 
     onMounted(()=> {
-      handleQuery({});
+      handleQuery({
+        page: 1,
+        size: pagination.value.pageSize
+      });
     })
 
     return {
