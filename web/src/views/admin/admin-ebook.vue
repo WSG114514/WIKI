@@ -13,9 +13,9 @@
           <img v-if="cover" :src="cover" alt="avatar"/>
         </template>
 
-        <template v-slot:action="{ text, record}">
+        <template v-slot:action="{ text, record }">
           <a-space size="small">
-            <a-button type="primary" @click="edit">
+            <a-button type="primary" @click="edit(record)">
               编辑
             </a-button>
             <a-button type="danger">
@@ -33,7 +33,14 @@
       :confirm-loading="modalLoading"
       @ok="handleModalOK"
   >
-    <p>test</p>
+    <a-form :model="ebook" :label-col="{ span: 6 }" :wrapper-col="wrapperCol">
+      <a-form-item label="封面">
+        <a-input v-model:value="ebook.cover" />
+      </a-form-item>
+      <a-form-item label="名称">
+        <a-input v-model:value="ebook.name" />
+      </a-form-item>
+    </a-form>
   </a-modal>
 </template>
 <script lang="ts">
@@ -125,19 +132,21 @@ export default defineComponent({
     //---------------------表单-----------------------
     const modalVisible = ref(false);
     const modalLoading = ref(false);
+    const ebook = ref({});
     const handleModalOK = ()=> {
       modalLoading.value = true;
       setTimeout(()=>{
         modalVisible.value = false;
-        modalLoading.value = true;
+        modalLoading.value = false;
       }, 2000);
     }
 
     /**
      * 编辑
      */
-    const edit = () => {
+    const edit = (record: any) => {
       modalVisible.value = true;
+      ebook.value = record;
     }
 
     onMounted(()=> {
@@ -149,6 +158,7 @@ export default defineComponent({
 
     return {
       ebooks,
+      ebook,
       pagination,
       columns,
       loading,
