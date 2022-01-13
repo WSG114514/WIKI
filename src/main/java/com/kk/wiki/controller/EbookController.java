@@ -4,6 +4,7 @@ import com.kk.wiki.domain.Ebook;
 import com.kk.wiki.req.EbookReq;
 import com.kk.wiki.resp.CommonResp;
 import com.kk.wiki.resp.EbookResp;
+import com.kk.wiki.resp.PageResp;
 import com.kk.wiki.service.EbookService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,9 +22,9 @@ public class EbookController {
 
     @GetMapping("/list")
     public CommonResp list(EbookReq req) {
-        List<EbookResp> list = ebookService.list(req);
+        PageResp<EbookResp> list = ebookService.list(req);
 
-        CommonResp<List> commonResp = new CommonResp<>();
+        CommonResp<PageResp<EbookResp>> commonResp = new CommonResp<>();
         commonResp.setContent(list);
         commonResp.setMessage("test");
         commonResp.setSuccess(true);
