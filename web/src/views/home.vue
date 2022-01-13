@@ -112,11 +112,16 @@ export default defineComponent({
 
     onMounted(()=> {
       console.log('setup');
-      axios.get("/ebook/list").then((response) => {
+      axios.get("/ebook/list", {
+        params: {
+          page: 1,
+          size: 1000
+        }
+      }).then((response) => {
         console.log(response);
         const data = response.data;
-        ebooks.value = data.content;
-        ebooks1.books = data.content;
+        ebooks.value = data.content.list;
+        //ebooks1.books = data.content;
       });
     });
 
