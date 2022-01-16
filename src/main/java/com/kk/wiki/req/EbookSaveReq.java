@@ -1,6 +1,6 @@
-package com.kk.wiki.resp;
+package com.kk.wiki.req;
 
-public class EbookResp {
+public class EbookSaveReq {
     private Long id;
 
     private String name;
