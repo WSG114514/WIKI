@@ -23,9 +23,19 @@
             <a-button type="primary" @click="edit(record)">
               编辑
             </a-button>
-            <a-button type="danger">
-              删除
-            </a-button>
+
+            <a-popconfirm
+                title="删除后不可恢复，确认删除?"
+                ok-text="Yes"
+                cancel-text="No"
+                @confirm="del(record.id)"
+            >
+              <a-button type="danger">
+                删除
+              </a-button>
+            </a-popconfirm>
+
+
           </a-space>
         </template>
       </a-table>
@@ -49,7 +59,8 @@
   </a-modal>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted,ref } from 'vue';
+import { defineComponent, onMounted,ref} from 'vue';
+import { message } from 'ant-design-vue';
 import axios from "axios";
 
 export default defineComponent({
@@ -173,6 +184,27 @@ export default defineComponent({
       ebook.value = {};
     }
 
+    /**
+     * 删除
+     * @param id
+     */
+    const del = (id: number) => {
+      axios.delete("/ebook/delete/" + id).then((response)=> {
+            const data = response.data; // data = commonResp
+            if(data.success) {
+              //重新加载列表
+              message.success('删除成功');
+              handleQuery({
+                page: pagination.value.current,
+                size: pagination.value.pageSize
+              });
+            }else {
+              message.success('删除失败');
+            }
+          }
+      );
+    }
+
     onMounted(()=> {
       handleQuery({
         page: 1,
@@ -190,6 +222,7 @@ export default defineComponent({
 
       edit,
       add,
+      del,
 
       modalVisible,
       modalLoading,

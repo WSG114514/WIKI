@@ -1,6 +1,10 @@
 package com.kk.wiki.req;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+
 public class EbookQueryReq extends PageReq{
+    @JsonSerialize(using= ToStringSerializer.class)
     private Long id;
 
     private String name;

@@ -1,5 +1,6 @@
 package com.kk.wiki.controller;
 
+import com.kk.wiki.domain.Ebook;
 import com.kk.wiki.req.EbookQueryReq;
 import com.kk.wiki.req.EbookSaveReq;
 import com.kk.wiki.resp.CommonResp;
@@ -32,6 +33,13 @@ public class EbookController {
     public CommonResp save(@RequestBody EbookSaveReq req) {
         CommonResp commonResp = new CommonResp();
         ebookService.save(req);
+        return commonResp;
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public CommonResp delete(@PathVariable Long id) {
+        CommonResp commonResp = new CommonResp();
+        ebookService.delete(id);
         return commonResp;
     }
 }
