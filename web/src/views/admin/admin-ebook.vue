@@ -1,11 +1,23 @@
 <template>
   <a-layout>
     <a-layout-content :style="{ background: '#fff', padding: '24px', margin: 0, minHeight: '280px' }">
-      <p>
-        <a-button type="primary" @click="add()" size="large">
-          新增
-        </a-button>
-      </p>
+      <a-from layout="inline" :model="param">
+        <a-form-item>
+          <a-input-search
+              v-model:value="searchValue.name"
+              placeholder="名称"
+              enter-button="Search"
+              size="large"
+              @search="handleQuery(1, pagination.pageSize)"
+          />
+        </a-form-item>
+        <a-form-item>
+          <a-button type="primary" @click="add()" size="large">
+            新增
+          </a-button>
+        </a-form-item>
+
+      </a-from>
       <a-table
           :columns="columns"
           :data-source="ebooks"
@@ -71,6 +83,8 @@ export default defineComponent({
       total: 0
     });
     const loading = ref(false);
+    const searchValue = ref();
+    searchValue.value = {};
 
     const columns = [
       {
@@ -120,7 +134,8 @@ export default defineComponent({
       axios.get("/ebook/list", {
         params: {
           page: p.page,
-          size: p.size
+          size: p.size,
+          name: searchValue.value.name
         }
       }).then((response) => {
         loading.value = false;
@@ -145,7 +160,8 @@ export default defineComponent({
       console.log("pagination" + pagination);
       handleQuery({
         page: pagination.current,
-        size: pagination.pageSize
+        size: pagination.pageSize,
+        name: searchValue.value.name
       });
     }
 
@@ -226,6 +242,7 @@ export default defineComponent({
       columns,
       loading,
       handleTableChange,
+      searchValue,
 
       edit,
       add,
@@ -233,7 +250,8 @@ export default defineComponent({
 
       modalVisible,
       modalLoading,
-      handleModalOK
+      handleModalOK,
+      handleQuery
     };
   },
   components: {
