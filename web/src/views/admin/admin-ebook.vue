@@ -34,8 +34,6 @@
                 删除
               </a-button>
             </a-popconfirm>
-
-
           </a-space>
         </template>
       </a-table>
@@ -69,7 +67,7 @@ export default defineComponent({
     const ebooks = ref();
     const pagination = ref({
       current: 1,
-      pageSize: 4,
+      pageSize: 10,
       total: 0
     });
     const loading = ref(false);
@@ -126,11 +124,17 @@ export default defineComponent({
         }
       }).then((response) => {
         loading.value = false;
-        ebooks.value = response.data.content.list;
+        if(response.data.success) {
 
-        //重置分页配置
-        pagination.value.current = p.page;
-        pagination.value.total = response.data.content.total;
+          ebooks.value = response.data.content.list;
+          //重置分页配置
+          pagination.value.current = p.page;
+          pagination.value.total = response.data.content.total;
+          message.success("加载成功");
+        }else {
+
+          message.error(response.data.message);
+        }
       });
     }
 
@@ -153,10 +157,13 @@ export default defineComponent({
       modalLoading.value = true;
       axios.post("/ebook/save", ebook.value).then((response)=> {
             const data = response.data;
-            if(data.success) {
-              modalVisible.value = false;
-              modalLoading.value = false;
+            modalVisible.value = false;
+            if(!data.success) {
+              message.error(data.message);
 
+            }else {
+
+              modalLoading.value = false;
               //重新加载列表
               handleQuery({
                 page: pagination.value.current,
@@ -199,7 +206,7 @@ export default defineComponent({
                 size: pagination.value.pageSize
               });
             }else {
-              message.success('删除失败');
+              message.error('删除失败');
             }
           }
       );
