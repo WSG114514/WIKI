@@ -16,8 +16,8 @@
             新增
           </a-button>
         </a-form-item>
-
       </a-from>
+
       <a-table
           :columns="columns"
           :data-source="ebooks"
@@ -26,7 +26,7 @@
           :loading="loading"
           @change="handleTableChange"
       >
-        <template #cover="{ text: cover}">
+        <template #cover="{ text: cover }">
           <img v-if="cover" :src="cover" alt="avatar"/>
         </template>
 
@@ -72,6 +72,7 @@
 import { defineComponent, onMounted,ref} from 'vue';
 import { message } from 'ant-design-vue';
 import axios from "axios";
+import {Tool} from "@/util/tool";
 
 export default defineComponent({
   name: 'AdminEbook',
@@ -195,7 +196,7 @@ export default defineComponent({
      */
     const edit = (record: any) => {
       modalVisible.value = true;
-      ebook.value = record;
+      ebook.value = Tool.copy(record);
     }
 
     /**
