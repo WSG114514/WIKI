@@ -8,7 +8,7 @@
               placeholder="名称"
               enter-button="Search"
               size="large"
-              @search="handleQuery(1, pagination.pageSize)"
+              @search="handleQuery()"
           />
         </a-form-item>
         <a-form-item>
@@ -20,11 +20,10 @@
 
       <a-table
           :columns="columns"
-          :data-source="categorys"
+          :data-source="level1"
           :row-key="record => record.id"
-          :pagination="pagination"
           :loading="loading"
-          @change="handleTableChange"
+          :pagination="false"
       >
         <template #cover="{ text: cover }">
           <img v-if="cover" :src="cover" alt="avatar"/>
@@ -81,13 +80,9 @@ export default defineComponent({
   name: 'AdminCategory',
   setup() {
     const categorys = ref();
-    const pagination = ref({
-      current: 1,
-      pageSize: 10,
-      total: 0
-    });
     const loading = ref(false);
     const searchValue = ref();
+    const level1 = ref();
     searchValue.value = {};
 
     const columns = [
@@ -118,37 +113,18 @@ export default defineComponent({
      */
     const handleQuery = (p: any) => {
       loading.value = true;
-      axios.get("/category/list", {
-        params: {
-          page: p.page,
-          size: p.size,
-          name: searchValue.value.name
-        }
-      }).then((response) => {
+      axios.get("/category/all", ).then((response) => {
         loading.value = false;
         if(response.data.success) {
-
-          categorys.value = response.data.content.list;
-          //重置分页配置
-          pagination.value.current = p.page;
-          pagination.value.total = response.data.content.total;
+          categorys.value = response.data.content;
+          console.log("原始数据" + categorys.value)
+          level1.value = [];
+          level1.value = Tool.array2Tree(categorys.value, 0);
+          console.log("树形结构: " + level1.value);
           message.success("加载成功");
         }else {
-
           message.error(response.data.message);
         }
-      });
-    }
-
-    /**
-     * 表格点击页码时触发
-     */
-    const handleTableChange = (pagination: any) => {
-      console.log("pagination" + pagination);
-      handleQuery({
-        page: pagination.current,
-        size: pagination.pageSize,
-        name: searchValue.value.name
       });
     }
 
@@ -169,8 +145,6 @@ export default defineComponent({
               modalLoading.value = false;
               //重新加载列表
               handleQuery({
-                page: pagination.value.current,
-                size: pagination.value.pageSize
               });
             }
           }
@@ -205,8 +179,6 @@ export default defineComponent({
               //重新加载列表
               message.success('删除成功');
               handleQuery({
-                page: pagination.value.current,
-                size: pagination.value.pageSize
               });
             }else {
               message.error('删除失败');
@@ -217,19 +189,16 @@ export default defineComponent({
 
     onMounted(()=> {
       handleQuery({
-        page: 1,
-        size: pagination.value.pageSize
       });
     })
 
     return {
       categorys,
       category,
-      pagination,
       columns,
       loading,
-      handleTableChange,
       searchValue,
+      level1,
 
       edit,
       add,
@@ -245,6 +214,4 @@ export default defineComponent({
 
   },
 });
-
-
 </script>

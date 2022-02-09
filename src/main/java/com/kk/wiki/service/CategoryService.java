@@ -30,6 +30,7 @@ public class CategoryService {
         //PageHelper在查詢一次后就會失效**** （）
         PageHelper.startPage(req.getPage(), req.getSize());
         CategoryExample categoryExample = new CategoryExample();
+        categoryExample.setOrderByClause("sort asc");
         //createCriteria 相当于创建一个where条件
         CategoryExample.Criteria criteria = categoryExample.createCriteria();
 
@@ -43,6 +44,22 @@ public class CategoryService {
         pageResp.setTotal(pageInfo.getTotal());
 
         return pageResp;
+    }
+
+    /**
+     * 查询所有
+     * @return
+     */
+    public List<CategoryQueryResp> all() {
+
+        CategoryExample categoryExample = new CategoryExample();
+        categoryExample.setOrderByClause("sort asc");
+        List<Category> categoryList = categoryMapper.selectByExample(categoryExample);
+
+        //复制列表
+        List<CategoryQueryResp> list = CopyUtil.copyList(categoryList, CategoryQueryResp.class);
+
+        return list;
     }
 
     /**
