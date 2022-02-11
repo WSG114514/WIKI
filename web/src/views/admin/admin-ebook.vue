@@ -65,6 +65,9 @@
       <a-form-item label="名称">
         <a-input v-model:value="ebook.name" />
       </a-form-item>
+      <a-form-item label="分类">
+        <a-cascader v-model:value="categoryIds" :options="level1" :field-names="{ label:'name', value:'id', children:'children'}" placeholder="Please select" />
+      </a-form-item>
     </a-form>
   </a-modal>
 </template>
@@ -85,6 +88,9 @@ export default defineComponent({
     });
     const loading = ref(false);
     const searchValue = ref();
+    const categoryIds = ref();
+
+    const level1 = ref();
     searchValue.value = {};
 
     const columns = [
@@ -169,9 +175,11 @@ export default defineComponent({
     //---------------------表单-----------------------
     const modalVisible = ref(false);
     const modalLoading = ref(false);
-    const ebook = ref({});
+    const ebook = ref();
     const handleModalOK = ()=> {
       modalLoading.value = true;
+      ebook.value.category1Id = categoryIds.value[0];
+      ebook.value.category2Id = categoryIds.value[1];
       axios.post("/ebook/save", ebook.value).then((response)=> {
             const data = response.data;
             modalVisible.value = false;
@@ -197,6 +205,25 @@ export default defineComponent({
     const edit = (record: any) => {
       modalVisible.value = true;
       ebook.value = Tool.copy(record);
+      categoryIds.value = [ebook.value.category1Id, ebook.value.category2Id];
+    }
+
+    /**
+     * 数据查询
+     */
+    const handleQueryCategory = (p: any) => {
+      loading.value = true;
+      axios.get("/category/all", ).then((response) => {
+        loading.value = false;
+        if(response.data.success) {
+          level1.value = [];
+          level1.value = Tool.array2Tree(response.data.content, 0);
+          console.log("树形结构: " + level1.value);
+          message.success("加载成功");
+        }else {
+          message.error(response.data.message);
+        }
+      });
     }
 
     /**
@@ -234,6 +261,8 @@ export default defineComponent({
         page: 1,
         size: pagination.value.pageSize
       });
+
+      handleQueryCategory({});
     })
 
     return {
@@ -244,6 +273,8 @@ export default defineComponent({
       loading,
       handleTableChange,
       searchValue,
+      categoryIds,
+      level1,
 
       edit,
       add,
