@@ -217,6 +217,12 @@ export default defineComponent({
       axios.get("/category/all", ).then((response) => {
         loading.value = false;
         if(response.data.success) {
+          //加载完分类后，再加载电子书，否则分类加载慢的话电子书渲染会报错。（asiox是异步执行）
+          handleQuery({
+            page: 1,
+            size: pagination.value.pageSize
+          });
+
           categorys = response.data.content;
           level1.value = [];
           level1.value = Tool.array2Tree(response.data.content, 0);
@@ -270,12 +276,6 @@ export default defineComponent({
 
     onMounted(()=> {
       handleQueryCategory();
-      handleQuery({
-        page: 1,
-        size: pagination.value.pageSize
-      });
-
-
     })
 
     return {
