@@ -82,6 +82,8 @@ export default defineComponent({
 
     const level1 = ref();
     const isShowWelcome = ref(true);
+    let categoryId2 = 0;
+
     let categorys: any;
     const handleQueryCategory = () => {
       axios.get("/category/all", ).then((response) => {
@@ -97,9 +99,28 @@ export default defineComponent({
       });
     }
 
+    const handleQueryEbook =() => {
+      axios.get("/ebook/list", {
+        params: {
+          page: 1,
+          size: 1000,
+          categoryId2: categoryId2
+        }
+      }).then((response) => {
+        console.log(response);
+        const data = response.data;
+        ebooks.value = data.content.list;
+        //ebooks1.books = data.content;
+      });
+    }
+
     const handleClick = (value: any)=> {
       console.log("menu click");
       isShowWelcome.value = value.key === 'welcome';
+      if (!isShowWelcome.value) {
+        categoryId2 = value.key;
+        handleQueryEbook();
+      }
     }
 
     const pagination = {
@@ -116,19 +137,8 @@ export default defineComponent({
     ];
 
     onMounted(()=> {
-      console.log('setup');
       handleQueryCategory();
-      axios.get("/ebook/list", {
-        params: {
-          page: 1,
-          size: 1000
-        }
-      }).then((response) => {
-        console.log(response);
-        const data = response.data;
-        ebooks.value = data.content.list;
-        //ebooks1.books = data.content;
-      });
+      handleQueryEbook();
     });
 
     return {
