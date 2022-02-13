@@ -30,6 +30,11 @@
           <img v-if="cover" :src="cover" alt="avatar"/>
         </template>
 
+        <template v-slot:category="{ text, record }">
+
+          <span>{{ getCategoryName(record.category1Id) }} / {{ getCategoryName(record.category2Id) }}</span>
+        </template>
+
         <template v-slot:action="{ text, record }">
           <a-space size="small">
             <a-button type="primary" @click="edit(record)">
@@ -105,14 +110,8 @@ export default defineComponent({
         dataIndex: 'name',
       },
       {
-        title: '分类1',
-        key: 'category1Id',
-        dataIndex: 'category1Id',
-      },
-      {
-        title: '分类2',
-        key: 'category2Id',
-        dataIndex: 'category2Id',
+        title: '分类',
+        slots: { customRender: 'category' }
       },
       {
         title: '文档数',
@@ -138,6 +137,8 @@ export default defineComponent({
      */
     const handleQuery = (p: any) => {
       loading.value = true;
+      //查询之前先把现有数据eBook里的数据清空，如果不清空则编辑保存重新加载数据后，再次点击编辑，则列表显示的还是原来的数据。
+      ebooks.value = [];
       axios.get("/ebook/list", {
         params: {
           page: p.page,
@@ -208,14 +209,16 @@ export default defineComponent({
       categoryIds.value = [ebook.value.category1Id, ebook.value.category2Id];
     }
 
+    let categorys: any;
     /**
      * 数据查询
      */
-    const handleQueryCategory = (p: any) => {
+    const handleQueryCategory = () => {
       loading.value = true;
       axios.get("/category/all", ).then((response) => {
         loading.value = false;
         if(response.data.success) {
+          categorys = response.data.content;
           level1.value = [];
           level1.value = Tool.array2Tree(response.data.content, 0);
           console.log("树形结构: " + level1.value);
@@ -224,6 +227,16 @@ export default defineComponent({
           message.error(response.data.message);
         }
       });
+    }
+
+    const getCategoryName = (cid: number) => {
+      let result = "";
+      categorys.forEach((item: any) => {
+        if (item.id === cid) {
+          result = item.name;
+        }
+      });
+      return result;
     }
 
     /**
@@ -257,12 +270,13 @@ export default defineComponent({
     }
 
     onMounted(()=> {
+      handleQueryCategory();
       handleQuery({
         page: 1,
         size: pagination.value.pageSize
       });
 
-      handleQueryCategory({});
+
     })
 
     return {
@@ -272,6 +286,7 @@ export default defineComponent({
       columns,
       loading,
       handleTableChange,
+      getCategoryName,
       searchValue,
       categoryIds,
       level1,
