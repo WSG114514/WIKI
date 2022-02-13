@@ -9,9 +9,7 @@
           @click="handleClick"
       >
         <a-menu-item key="welcome">
-          <router-link :to="'/'">
             <span><MailOutlined /> welcome</span>
-          </router-link>
         </a-menu-item>
         <a-sub-menu v-for="item in level1" :key="item.id">
           <template v-slot:title>
@@ -27,8 +25,11 @@
       </a-menu>
     </a-layout-sider>
     <a-layout-content :style="{ background: '#fff', padding: '24px', margin: 0, minHeight: '280px' }">
-      <a-list item-layout="vertical" size="large"  :data-source="ebooks" :grid="{ gutter: 20, column: 3 }">
+      <div class="welcome" v-show="isShowWelcome">
+        <h1>欢迎使用Wiki知识库</h1>
+      </div>
 
+      <a-list v-show="!isShowWelcome" item-layout="vertical" size="large"  :data-source="ebooks" :grid="{ gutter: 20, column: 3 }">
         <template #renderItem="{ item }">
           <a-list-item key="item.name">
             <template #actions>
@@ -80,6 +81,7 @@ export default defineComponent({
     const ebooks1 = reactive({books:[]});
 
     const level1 = ref();
+    const isShowWelcome = ref(true);
     let categorys: any;
     const handleQueryCategory = () => {
       axios.get("/category/all", ).then((response) => {
@@ -95,8 +97,9 @@ export default defineComponent({
       });
     }
 
-    const handleClick = ()=> {
+    const handleClick = (value: any)=> {
       console.log("menu click");
+      isShowWelcome.value = value.key === 'welcome';
     }
 
     const pagination = {
@@ -135,7 +138,8 @@ export default defineComponent({
       actions,
       pagination,
       level1,
-      handleClick
+      handleClick,
+      isShowWelcome
     }
   }
 });
