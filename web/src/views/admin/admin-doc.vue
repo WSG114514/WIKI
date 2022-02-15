@@ -62,17 +62,19 @@
         <a-input v-model:value="doc.name" />
       </a-form-item>
       <a-form-item label="父分类">
-        <a-select
-            v-model:value="docs.parent"
-            ref="select"
+        <a-tree-select
+            v-model:value="doc.parent"
+            show-search
+            :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+            :tree-data="treeSelectData"
+            placeholder="请选择父文档"
+            allow-clear
+            tree-default-expand-all
+            :replaceFields="{title:'name', key:'id', value: 'id'}"
         >
-          <a-select-option value="0">
-            无
-          </a-select-option>
-          <a-select-option v-for="c in level1" :key="c.id" :value="c.id" :disabled="doc.id === c.id">
-            {{c.name}}
-          </a-select-option>
-        </a-select>
+
+        </a-tree-select>
+
       </a-form-item>
       <a-form-item label="顺序">
         <a-input v-model:value="doc.sort" />
@@ -85,6 +87,7 @@ import { defineComponent, onMounted,ref} from 'vue';
 import { message } from 'ant-design-vue';
 import axios from "axios";
 import {Tool} from "@/util/tool";
+import {useRoute} from "vue-router";
 
 export default defineComponent({
   name: 'AdminDoc',
@@ -94,6 +97,9 @@ export default defineComponent({
     const searchValue = ref();
     const level1 = ref();
     searchValue.value = {};
+    // 通过route可以得到各种信息
+    const route = useRoute();
+    console.log("路由:", route);
 
     const columns = [
       {
@@ -122,6 +128,8 @@ export default defineComponent({
      * 数据查询
      */
     const handleQuery = (p: any) => {
+      // 如果不清空现有数据，则编辑保存重新加载后再次点击编辑还是原来的数据。
+      level1.value = [];
       loading.value = true;
       axios.get("/doc/all", ).then((response) => {
         loading.value = false;
@@ -142,8 +150,12 @@ export default defineComponent({
     const modalVisible = ref(false);
     const modalLoading = ref(false);
     const doc = ref({});
+    const treeSelectData = ref();
+    treeSelectData.value = [];
+
     const handleModalOK = ()=> {
       modalLoading.value = true;
+      debugger;
       axios.post("/doc/save", doc.value).then((response)=> {
             const data = response.data;
             modalVisible.value = false;
@@ -167,6 +179,12 @@ export default defineComponent({
     const edit = (record: any) => {
       modalVisible.value = true;
       doc.value = Tool.copy(record);
+
+      // 不能选择当前节点以及所有的子节点
+      treeSelectData.value = Tool.copy(level1.value);
+      setDisable(treeSelectData.value, record.id);
+
+      treeSelectData.value.unshift({id: 0, name: '无'});
     }
 
     /**
@@ -175,7 +193,12 @@ export default defineComponent({
      */
     const add = () => {
       modalVisible.value = true;
-      doc.value = {};
+      doc.value = {
+        ebookId: route.query.ebookId
+      };
+
+      treeSelectData.value = Tool.copy(level1.value);
+      treeSelectData.value.unshift({id: 0, name: '无'});
     }
 
     /**
@@ -197,6 +220,31 @@ export default defineComponent({
       );
     }
 
+    /**
+     * 将某一节点及其子节点下面所有设置为disabled
+     */
+    const setDisable = (treeSelectData: any, id:any ) => {
+      //遍历数组，即遍历某一层节点
+      for(let i = 0; i < treeSelectData.length; i++) {
+        const node = treeSelectData[i];
+        if (node.id === id) {
+          //目标节点
+          node.disabled = true;
+          const children = node.children;
+          if (Tool.isNotEmpty(children)){
+            for (let j=0; j<children.length; j++) {
+              setDisable(children, children[j].id);
+            }
+          }
+        }else {
+          const children = node.children;
+          if (Tool.isNotEmpty(children)) {
+            setDisable(children, id);
+          }
+        }
+      }
+    }
+
     onMounted(()=> {
       handleQuery({
       });
@@ -209,6 +257,7 @@ export default defineComponent({
       loading,
       searchValue,
       level1,
+      treeSelectData,
 
       edit,
       add,
