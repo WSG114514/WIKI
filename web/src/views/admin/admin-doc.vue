@@ -57,25 +57,25 @@
       :confirm-loading="modalLoading"
       @ok="handleModalOK"
   >
-    <a-form :model="category" :label-col="{ span: 6 }" :wrapper-col="wrapperCol">
+    <a-form :model="doc" :label-col="{ span: 6 }" :wrapper-col="wrapperCol">
       <a-form-item label="名称">
-        <a-input v-model:value="category.name" />
+        <a-input v-model:value="doc.name" />
       </a-form-item>
       <a-form-item label="父分类">
         <a-select
-          v-model:value="categorys.parent"
-          ref="select"
+            v-model:value="docs.parent"
+            ref="select"
         >
           <a-select-option value="0">
             无
           </a-select-option>
-          <a-select-option v-for="c in level1" :key="c.id" :value="c.id" :disabled="category.id === c.id">
+          <a-select-option v-for="c in level1" :key="c.id" :value="c.id" :disabled="doc.id === c.id">
             {{c.name}}
           </a-select-option>
         </a-select>
       </a-form-item>
       <a-form-item label="顺序">
-        <a-input v-model:value="category.sort" />
+        <a-input v-model:value="doc.sort" />
       </a-form-item>
     </a-form>
   </a-modal>
@@ -87,9 +87,9 @@ import axios from "axios";
 import {Tool} from "@/util/tool";
 
 export default defineComponent({
-  name: 'AdminCategory',
+  name: 'AdminDoc',
   setup() {
-    const categorys = ref();
+    const docs = ref();
     const loading = ref(false);
     const searchValue = ref();
     const level1 = ref();
@@ -123,13 +123,13 @@ export default defineComponent({
      */
     const handleQuery = (p: any) => {
       loading.value = true;
-      axios.get("/category/all", ).then((response) => {
+      axios.get("/doc/all", ).then((response) => {
         loading.value = false;
         if(response.data.success) {
-          categorys.value = response.data.content;
-          console.log("原始数据" + categorys.value)
+          docs.value = response.data.content;
+          console.log("原始数据" + docs.value)
           level1.value = [];
-          level1.value = Tool.array2Tree(categorys.value, 0);
+          level1.value = Tool.array2Tree(docs.value, 0);
           console.log("树形结构: " + level1.value);
           message.success("加载成功");
         }else {
@@ -141,10 +141,10 @@ export default defineComponent({
     //---------------------表单-----------------------
     const modalVisible = ref(false);
     const modalLoading = ref(false);
-    const category = ref({});
+    const doc = ref({});
     const handleModalOK = ()=> {
       modalLoading.value = true;
-      axios.post("/category/save", category.value).then((response)=> {
+      axios.post("/doc/save", doc.value).then((response)=> {
             const data = response.data;
             modalVisible.value = false;
             if(!data.success) {
@@ -166,7 +166,7 @@ export default defineComponent({
      */
     const edit = (record: any) => {
       modalVisible.value = true;
-      category.value = Tool.copy(record);
+      doc.value = Tool.copy(record);
     }
 
     /**
@@ -175,7 +175,7 @@ export default defineComponent({
      */
     const add = () => {
       modalVisible.value = true;
-      category.value = {};
+      doc.value = {};
     }
 
     /**
@@ -183,7 +183,7 @@ export default defineComponent({
      * @param id
      */
     const del = (id: number) => {
-      axios.delete("/category/delete/" + id).then((response)=> {
+      axios.delete("/doc/delete/" + id).then((response)=> {
             const data = response.data; // data = commonResp
             if(data.success) {
               //重新加载列表
@@ -203,8 +203,8 @@ export default defineComponent({
     })
 
     return {
-      categorys,
-      category,
+      docs,
+      doc,
       columns,
       loading,
       searchValue,
