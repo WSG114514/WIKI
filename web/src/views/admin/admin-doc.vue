@@ -79,6 +79,9 @@
       <a-form-item label="顺序">
         <a-input v-model:value="doc.sort" />
       </a-form-item>
+      <a-form-item label="内容">
+        <div id="docContent"></div>
+      </a-form-item>
     </a-form>
   </a-modal>
 </template>
@@ -89,6 +92,7 @@ import axios from "axios";
 import {Tool} from "@/util/tool";
 import {useRoute} from "vue-router";
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
+import E from 'wangeditor';
 
 export default defineComponent({
   name: 'AdminDoc',
@@ -101,6 +105,8 @@ export default defineComponent({
     // 通过route可以得到各种信息
     const route = useRoute();
     console.log("路由:", route);
+    const editor = new E("#docContent");
+
 
     const columns = [
       {
@@ -186,6 +192,9 @@ export default defineComponent({
       setDisable(treeSelectData.value, record.id);
 
       treeSelectData.value.unshift({id: 0, name: '无'});
+      setTimeout(()=>{
+        editor.create();
+      }, 100)
     }
 
     /**
@@ -200,6 +209,9 @@ export default defineComponent({
 
       treeSelectData.value = Tool.copy(level1.value);
       treeSelectData.value.unshift({id: 0, name: '无'});
+      setTimeout(()=>{
+        editor.create();
+      }, 100)
     }
 
     /**
@@ -293,6 +305,7 @@ export default defineComponent({
     }
 
     onMounted(()=> {
+
       handleQuery({
       });
     })
