@@ -83,11 +83,12 @@
   </a-modal>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted,ref} from 'vue';
-import { message } from 'ant-design-vue';
+import { defineComponent, onMounted,ref, createVNode} from 'vue';
+import { message, Modal} from 'ant-design-vue';
 import axios from "axios";
 import {Tool} from "@/util/tool";
 import {useRoute} from "vue-router";
+import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
 
 export default defineComponent({
   name: 'AdminDoc',
@@ -204,20 +205,36 @@ export default defineComponent({
     /**
      * 删除
      * @param id
+     * 一次性删除节点和节点下的子树，将id以数组转化为字符串传到后端
      */
     const del = (id: number) => {
-      axios.delete("/doc/delete/" + id).then((response)=> {
-            const data = response.data; // data = commonResp
-            if(data.success) {
-              //重新加载列表
-              message.success('删除成功');
-              handleQuery({
-              });
-            }else {
-              message.error('删除失败');
-            }
-          }
-      );
+      ids.length = 0;
+      delName.length = 0;
+      getDeleteIds(level1.value, id);
+      const delNames = delName.join(", ");
+
+      //***使用响应式变量注意取值时用value
+      Modal.confirm({
+        title: () => '重要提醒',
+        icon: () => createVNode(ExclamationCircleOutlined),
+        content: () => '文档: ' + delNames + '删除后不可恢复，确认删除',
+        onOk() {
+          axios.delete("/doc/delete/" + ids.join(",")).then((response)=> {
+                const data = response.data; // data = commonResp
+                if(data.success) {
+                  //重新加载列表
+                  message.success('删除成功');
+                  handleQuery({
+                  });
+                }else {
+                  message.error('删除失败');
+                }
+              }
+          );
+        },
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        onCancel() {},
+      });
     }
 
     /**
@@ -245,6 +262,36 @@ export default defineComponent({
       }
     }
 
+    const ids:Array<string> = [];
+    const delName:Array<string> = [];
+    /**
+     * 查找树枝
+     * @param treeSelectData
+     * @param id
+     */
+    const getDeleteIds = (treeSelectData: any, id:any ) => {
+      //遍历数组，即遍历某一层节点
+      for(let i = 0; i < treeSelectData.length; i++) {
+        const node = treeSelectData[i];
+        if (node.id === id) {
+          //目标节点
+          ids.push(node.id);
+          delName.push(node.name);
+          const children = node.children;
+          if (Tool.isNotEmpty(children)){
+            for (let j=0; j<children.length; j++) {
+              getDeleteIds(children, children[j].id);
+            }
+          }
+        }else {
+          const children = node.children;
+          if (Tool.isNotEmpty(children)) {
+            getDeleteIds(children, id);
+          }
+        }
+      }
+    }
+
     onMounted(()=> {
       handleQuery({
       });
@@ -266,7 +313,7 @@ export default defineComponent({
       modalVisible,
       modalLoading,
       handleModalOK,
-      handleQuery
+      handleQuery,
     };
   },
   components: {
