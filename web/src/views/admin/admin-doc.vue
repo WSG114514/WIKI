@@ -2,7 +2,7 @@
   <a-layout>
     <a-layout-content :style="{ background: '#fff', padding: '24px', margin: 0, minHeight: '280px' }">
 
-      <a-row>
+      <a-row :gutter="24">
         <a-col :span="8">
           <a-from layout="inline" :model="param">
             <a-form-item>
@@ -21,19 +21,22 @@
             </a-form-item>
           </a-from>
           <a-table
+              v-if="level1.length > 0"
               :columns="columns"
               :data-source="level1"
               :row-key="record => record.id"
               :loading="loading"
               :pagination="false"
+              size="small"
+              :defaultExpandAllRows="true"
           >
-            <template #cover="{ text: cover }">
-              <img v-if="cover" :src="cover" alt="avatar"/>
+            <template #name="{ text: cover }">
+              {{record.sort}} {{text}}
             </template>
 
             <template v-slot:action="{ text, record }">
               <a-space size="small">
-                <a-button type="primary" @click="edit(record)">
+                <a-button type="primary" @click="edit(record)" size="small">
                   编辑
                 </a-button>
 
@@ -43,7 +46,7 @@
                     cancel-text="No"
                     @confirm="del(record.id)"
                 >
-                  <a-button type="danger">
+                  <a-button type="danger" size="small">
                     删除
                   </a-button>
                 </a-popconfirm>
@@ -52,11 +55,20 @@
           </a-table>
         </a-col>
         <a-col :span="16">
-          <a-form :model="doc" :label-col="{ span: 6 }" :wrapper-col="wrapperCol">
-            <a-form-item label="名称">
-              <a-input v-model:value="doc.name" />
+          <p>
+            <a-form layout="inline" :model="param">
+              <a-form-item>
+                <a-button type="primary" @click="handleModalOK()">
+                  保存
+                </a-button>
+              </a-form-item>
+            </a-form>
+          </p>
+          <a-form :model="doc" layout="vertical" :label-col="{ span: 6 }" :wrapper-col="wrapperCol">
+            <a-form-item>
+              <a-input v-model:value="doc.name" placeholder="名称" />
             </a-form-item>
-            <a-form-item label="父分类">
+            <a-form-item>
               <a-tree-select
                   v-model:value="doc.parent"
                   show-search
@@ -67,14 +79,12 @@
                   tree-default-expand-all
                   :replaceFields="{title:'name', key:'id', value: 'id'}"
               >
-
               </a-tree-select>
-
             </a-form-item>
-            <a-form-item label="顺序">
-              <a-input v-model:value="doc.sort" />
+            <a-form-item>
+              <a-input v-model:value="doc.sort" placeholder="顺序"/>
             </a-form-item>
-            <a-form-item label="内容">
+            <a-form-item>
               <div id="docContent"></div>
             </a-form-item>
           </a-form>
@@ -108,28 +118,19 @@ export default defineComponent({
     const loading = ref(false);
     const searchValue = ref();
     const level1 = ref();
+    level1.value = [];
     searchValue.value = {};
     // 通过route可以得到各种信息
     const route = useRoute();
     console.log("路由:", route);
     const editor = new E("#docContent");
-
+    editor.config.zIndex = 0;
 
     const columns = [
       {
         title: '名称',
         key: 'name',
         dataIndex: 'name',
-      },
-      {
-        title: '父分类',
-        key: 'parent',
-        dataIndex: 'parent',
-      },
-      {
-        title: '顺序',
-        key: 'sort',
-        dataIndex: 'sort',
       },
       {
         title: 'Action',
@@ -169,7 +170,6 @@ export default defineComponent({
 
     const handleModalOK = ()=> {
       modalLoading.value = true;
-      debugger;
       axios.post("/doc/save", doc.value).then((response)=> {
             const data = response.data;
             modalVisible.value = false;
@@ -199,9 +199,7 @@ export default defineComponent({
       setDisable(treeSelectData.value, record.id);
 
       treeSelectData.value.unshift({id: 0, name: '无'});
-      setTimeout(()=>{
-        editor.create();
-      }, 100)
+
     }
 
     /**
@@ -216,9 +214,7 @@ export default defineComponent({
 
       treeSelectData.value = Tool.copy(level1.value);
       treeSelectData.value.unshift({id: 0, name: '无'});
-      setTimeout(()=>{
-        editor.create();
-      }, 100)
+
     }
 
     /**
@@ -312,7 +308,7 @@ export default defineComponent({
     }
 
     onMounted(()=> {
-
+      editor.create();
       handleQuery({
       });
     })
