@@ -1,5 +1,6 @@
 package com.kk.wiki.controller;
 
+import com.kk.wiki.domain.Content;
 import com.kk.wiki.req.DocQueryReq;
 import com.kk.wiki.req.DocSaveReq;
 import com.kk.wiki.resp.DocQueryResp;
@@ -71,5 +72,13 @@ public class DocController {
 
         docService.delete(listLg);
         return commonResp;
+    }
+
+    @GetMapping("/find-content/{id}")
+    public CommonResp findContent(@PathVariable Long id) {
+        CommonResp<String> resp = new CommonResp<>();
+        String content = docService.findContent(id);
+        resp.setContent(content);
+        return resp;
     }
 }

@@ -161,15 +161,32 @@ export default defineComponent({
       });
     }
 
+    /**
+     * 文档内容查询
+     */
+    const handleQueryContent = (p: any) => {
+      // 如果不清空现有数据，则编辑保存重新加载后再次点击编辑还是原来的数据。
+      axios.get("/doc/find-content/" + doc.value.id).then((response) => {
+        loading.value = false;
+        if(response.data.success) {
+          editor.txt.html(response.data.content);
+        }else {
+          message.error(response.data.message);
+        }
+      });
+    }
+
     //---------------------表单-----------------------
     const modalVisible = ref(false);
     const modalLoading = ref(false);
-    const doc = ref({});
+    const doc = ref();
+    doc.value = {};
     const treeSelectData = ref();
     treeSelectData.value = [];
 
     const handleModalOK = ()=> {
       modalLoading.value = true;
+      doc.value.content = editor.txt.html();
       axios.post("/doc/save", doc.value).then((response)=> {
             const data = response.data;
             modalVisible.value = false;
@@ -178,7 +195,7 @@ export default defineComponent({
 
             }else {
 
-              modalLoading.value = false;
+              message.success("保存成功!")
               //重新加载列表
               handleQuery({
               });
@@ -193,13 +210,14 @@ export default defineComponent({
     const edit = (record: any) => {
       modalVisible.value = true;
       doc.value = Tool.copy(record);
-
+      handleQueryContent(doc.value.id);
       // 不能选择当前节点以及所有的子节点
       treeSelectData.value = Tool.copy(level1.value);
       setDisable(treeSelectData.value, record.id);
 
       treeSelectData.value.unshift({id: 0, name: '无'});
-
+      //
+      editor.txt.html()
     }
 
     /**
@@ -214,7 +232,7 @@ export default defineComponent({
 
       treeSelectData.value = Tool.copy(level1.value);
       treeSelectData.value.unshift({id: 0, name: '无'});
-
+      editor.txt.html("");
     }
 
     /**
