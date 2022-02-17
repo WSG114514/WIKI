@@ -28,7 +28,6 @@
       <div class="welcome" v-show="isShowWelcome">
         <h1>欢迎使用Wiki知识库</h1>
       </div>
-
       <a-list v-show="!isShowWelcome" item-layout="vertical" size="large"  :data-source="ebooks" :grid="{ gutter: 20, column: 3 }">
         <template #renderItem="{ item }">
           <a-list-item key="item.name">
@@ -41,7 +40,9 @@
 
             <a-list-item-meta :description="item.description">
               <template #title>
-                <a :href="item.href">{{ item.name }}</a>
+                <router-link :to="'/doc?ebookId=' + item.id">
+                  {{ item.name }}
+                </router-link>
               </template>
               <template #avatar><a-avatar :src="item.cover" /></template>
             </a-list-item-meta>

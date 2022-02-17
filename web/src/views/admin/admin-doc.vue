@@ -85,12 +85,25 @@
               <a-input v-model:value="doc.sort" placeholder="顺序"/>
             </a-form-item>
             <a-form-item>
+              <a-button type="primary" @click="showDrawer">预览</a-button>
+            </a-form-item>
+            <a-form-item>
               <div id="docContent"></div>
             </a-form-item>
           </a-form>
         </a-col>
       </a-row>
 
+      <a-drawer
+          title="文档预览"
+          width="1100"
+          placement="right"
+          :closable="false"
+          v-model:visible="visible"
+          :after-visible-change="afterVisibleChange"
+      >
+        <div :innerHTML="prehtml" class="wangeditor"></div>
+      </a-drawer>
     </a-layout-content>
   </a-layout>
 
@@ -118,6 +131,10 @@ export default defineComponent({
     const loading = ref(false);
     const searchValue = ref();
     const level1 = ref();
+    const treeSelectData = ref();
+    const visible = ref<boolean>(false);
+    const prehtml = ref();
+    treeSelectData.value = [];
     level1.value = [];
     searchValue.value = {};
     // 通过route可以得到各种信息
@@ -146,13 +163,17 @@ export default defineComponent({
       // 如果不清空现有数据，则编辑保存重新加载后再次点击编辑还是原来的数据。
       level1.value = [];
       loading.value = true;
-      axios.get("/doc/all", ).then((response) => {
+
+      axios.get("/doc/all/" + route.query.ebookId).then((response) => {
         loading.value = false;
         if(response.data.success) {
           docs.value = response.data.content;
           console.log("原始数据" + docs.value)
           level1.value = [];
           level1.value = Tool.array2Tree(docs.value, 0);
+          // 不能选择当前节点以及所有的子节点
+          treeSelectData.value = Tool.copy(level1.value);
+          treeSelectData.value.unshift({id: 0, name: '无'});
           console.log("树形结构: " + level1.value);
           message.success("加载成功");
         }else {
@@ -180,9 +201,9 @@ export default defineComponent({
     const modalVisible = ref(false);
     const modalLoading = ref(false);
     const doc = ref();
-    doc.value = {};
-    const treeSelectData = ref();
-    treeSelectData.value = [];
+    doc.value = {
+      ebookId: route.query.ebookId
+    };
 
     const handleModalOK = ()=> {
       modalLoading.value = true;
@@ -325,6 +346,11 @@ export default defineComponent({
       }
     }
 
+    const showDrawer = () => {
+      prehtml.value = editor.txt.html();
+      visible.value = true;
+    };
+
     onMounted(()=> {
       editor.create();
       handleQuery({
@@ -339,6 +365,8 @@ export default defineComponent({
       searchValue,
       level1,
       treeSelectData,
+      visible,
+      prehtml,
 
       edit,
       add,
@@ -348,6 +376,7 @@ export default defineComponent({
       modalLoading,
       handleModalOK,
       handleQuery,
+      showDrawer,
     };
   },
   components: {

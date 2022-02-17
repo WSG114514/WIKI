@@ -56,10 +56,11 @@ public class DocService {
      * 查询所有
      * @return
      */
-    public List<DocQueryResp> all() {
+    public List<DocQueryResp> all(Long ebookId) {
 
         DocExample docExample = new DocExample();
         docExample.setOrderByClause("sort asc");
+        docExample.createCriteria().andEbookIdEqualTo(ebookId);
         List<Doc> docList = docMapper.selectByExample(docExample);
 
         //复制列表
