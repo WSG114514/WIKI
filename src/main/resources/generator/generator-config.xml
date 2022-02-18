@@ -44,10 +44,10 @@
         <!--<table tableName="ebook"/>-->
         <!--<table tableName="category"/>-->
         <!--<table tableName="content"/>-->
-        <!--<table tableName="user"/>-->
+        <table tableName="user"/>
         <!--<table tableName="ebook"/>-->
         <!--<table tableName="category"/>-->
         <!--<table tableName="doc"/>-->
-        <table tableName="content"/>
+        <!--<table tableName="content"/>-->
     </context>
 </generatorConfiguration>
