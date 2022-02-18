@@ -74,6 +74,9 @@ import { message } from 'ant-design-vue';
 import axios from "axios";
 import {Tool} from "@/util/tool";
 
+declare let hexMd5: any;
+declare let KEY: any;
+
 export default defineComponent({
   name: 'AdminUser',
   setup() {
@@ -159,6 +162,9 @@ export default defineComponent({
     const user = ref();
     const handleModalOK = ()=> {
       modalLoading.value = true;
+
+      user.value.password = hexMd5(user.value.password + KEY);
+      debugger;
       axios.post("/user/save", user.value).then((response)=> {
             const data = response.data;
             modalVisible.value = false;

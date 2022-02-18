@@ -14,7 +14,7 @@ public class UserSaveReq {
     private String name;
 
     @NotNull(message = "【密码】不能为空")
-    @Length(min = 6, max = 20, message = "【密码长度】为6~20")
+    @Length(min = 6, max = 32, message = "【密码长度】为6~32")
     private String password;
 
     public Long getId() {
