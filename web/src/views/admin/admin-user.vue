@@ -57,7 +57,7 @@
   >
     <a-form :model="user" :label-col="{ span: 6 }" :wrapper-col="wrapperCol">
       <a-form-item label="登录名">
-        <a-input v-model:value="user.loginName" />
+        <a-input v-model:value="user.loginName" :disabled="!!user.id"/>
       </a-form-item>
       <a-form-item label="名称">
         <a-input v-model:value="user.name" />
@@ -164,7 +164,7 @@ export default defineComponent({
             modalVisible.value = false;
             if(!data.success) {
               message.error(data.message);
-
+              modalLoading.value = false;
             }else {
 
               modalLoading.value = false;

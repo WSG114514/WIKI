@@ -68,8 +68,10 @@ public class UserService {
             }
 
         }else {
-            // 更新
-            userMapper.updateByPrimaryKey(user);
+            // updateByPrimaryKeySelective会对字段进行判断再更新(如果为Null就忽略更新)，如果你只想更新某一字段，可以用这个方法。
+            // 防止LoginName被修改
+            user.setLoginName(null);
+            userMapper.updateByPrimaryKeySelective(user);
         }
     }
 
