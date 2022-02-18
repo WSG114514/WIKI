@@ -4,6 +4,8 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.kk.wiki.domain.User;
 import com.kk.wiki.domain.UserExample;
+import com.kk.wiki.exception.BusinessException;
+import com.kk.wiki.exception.BusinessExceptionCode;
 import com.kk.wiki.mapper.UserMapper;
 import com.kk.wiki.req.UserQueryReq;
 import com.kk.wiki.req.UserSaveReq;
@@ -12,6 +14,7 @@ import com.kk.wiki.resp.PageResp;
 import com.kk.wiki.utils.CopyUtil;
 import com.kk.wiki.utils.SnowFlake;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import javax.annotation.Resource;
@@ -56,8 +59,14 @@ public class UserService {
         User user = CopyUtil.copy(req, User.class);
         if (ObjectUtils.isEmpty(req.getId())) {
             // 新增
-            user.setId(snowFlake.nextId());
-            userMapper.insert(user);
+            if (ObjectUtils.isEmpty(selectByLoginName(req.getLoginName()))) {
+                user.setId(snowFlake.nextId());
+                userMapper.insert(user);
+            }else {
+                // 用户名已存在
+                throw new BusinessException(BusinessExceptionCode.USER_LOGIN_NAME_EXIST);
+            }
+
         }else {
             // 更新
             userMapper.updateByPrimaryKey(user);
@@ -66,5 +75,12 @@ public class UserService {
 
     public void delete(Long id) {
         userMapper.deleteByPrimaryKey(id);
+    }
+
+    public User selectByLoginName(String LoginName) {
+        UserExample userExample = new UserExample();
+        userExample.createCriteria().andLoginNameEqualTo(LoginName);
+        List<User> list = userMapper.selectByExample(userExample);
+        return CollectionUtils.isEmpty(list)?null:list.get(0);
     }
 }
