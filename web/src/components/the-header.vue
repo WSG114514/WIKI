@@ -52,6 +52,7 @@ export default defineComponent({
     }
 
     const Login =()=> {
+      debugger;
       console.log("开始登录");
       modalLoading.value = true;
       loginUser.value.password = hexMd5(loginUser.value.password + KEY);
