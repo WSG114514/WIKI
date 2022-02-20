@@ -29,6 +29,9 @@
 
         <template v-slot:action="{ text, record }">
           <a-space size="small">
+            <a-button type="primary" @click="resetPassword(record)">
+              重置密码
+            </a-button>
             <a-button type="primary" @click="edit(record)">
               编辑
             </a-button>
@@ -63,6 +66,19 @@
         <a-input v-model:value="user.name" />
       </a-form-item>
       <a-form-item label="密码" v-show="!user.id">
+        <a-input v-model:value="user.password" />
+      </a-form-item>
+    </a-form>
+  </a-modal>
+
+  <a-modal
+      title="重置密码"
+      v-model:visible="resetModalVisible"
+      :confirm-loading="resetmodalLoading"
+      @ok="handleResetModalOK"
+  >
+    <a-form :model="user" :label-col="{ span: 6 }" :wrapper-col="wrapperCol">
+      <a-form-item label="新密码">
         <a-input v-model:value="user.password" />
       </a-form-item>
     </a-form>
@@ -159,6 +175,8 @@ export default defineComponent({
     //---------------------表单-----------------------
     const modalVisible = ref(false);
     const modalLoading = ref(false);
+    const resetModalVisible = ref(false);
+    const resetmodalLoading = ref(false);
     const user = ref();
     const handleModalOK = ()=> {
       modalLoading.value = true;
@@ -222,6 +240,33 @@ export default defineComponent({
       );
     }
 
+    const handleResetModalOK = ()=> {
+      resetmodalLoading.value = true;
+
+      user.value.password = hexMd5(user.value.password + KEY);
+      axios.post("/user/reset-password", user.value).then((response)=> {
+        const data = response.data;
+        resetModalVisible.value = false;
+        if(!data.success) {
+          message.error(data.message);
+          modalLoading.value = false;
+        }else {
+          modalLoading.value = false;
+          //重新加载列表
+          handleQuery({
+            page: pagination.value.current,
+            size: pagination.value.pageSize
+          });
+        }}
+      );
+    }
+
+    const resetPassword = (record: any)=>{
+      resetModalVisible.value = true;
+      user.value = Tool.copy(record);
+      user.value.password = null;
+    }
+
     onMounted(() => {
       handleQuery({
         page: 1,
@@ -238,6 +283,8 @@ export default defineComponent({
       handleTableChange,
       searchValue,
       level1,
+      resetModalVisible,
+      resetmodalLoading,
 
       edit,
       add,
@@ -246,7 +293,9 @@ export default defineComponent({
       modalVisible,
       modalLoading,
       handleModalOK,
-      handleQuery
+      handleQuery,
+      handleResetModalOK,
+      resetPassword
     };
   },
   components: {

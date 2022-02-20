@@ -1,6 +1,7 @@
 package com.kk.wiki.controller;
 
 import com.kk.wiki.req.UserQueryReq;
+import com.kk.wiki.req.UserResetPasswordReq;
 import com.kk.wiki.req.UserSaveReq;
 import com.kk.wiki.resp.CommonResp;
 import com.kk.wiki.resp.UserQueryResp;
@@ -51,6 +52,14 @@ public class UserController {
     public CommonResp delete(@PathVariable Long id) {
         CommonResp commonResp = new CommonResp();
         userService.delete(id);
+        return commonResp;
+    }
+
+    @PostMapping("/reset-password")
+    public CommonResp resetPassword(@RequestBody @Valid UserResetPasswordReq req) {
+        req.setPassword(DigestUtils.md5DigestAsHex(req.getPassword().getBytes()));
+        CommonResp commonResp = new CommonResp();
+        userService.resetPassword(req);
         return commonResp;
     }
 }

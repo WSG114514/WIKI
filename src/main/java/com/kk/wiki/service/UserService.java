@@ -8,6 +8,7 @@ import com.kk.wiki.exception.BusinessException;
 import com.kk.wiki.exception.BusinessExceptionCode;
 import com.kk.wiki.mapper.UserMapper;
 import com.kk.wiki.req.UserQueryReq;
+import com.kk.wiki.req.UserResetPasswordReq;
 import com.kk.wiki.req.UserSaveReq;
 import com.kk.wiki.resp.UserQueryResp;
 import com.kk.wiki.resp.PageResp;
@@ -85,5 +86,14 @@ public class UserService {
         userExample.createCriteria().andLoginNameEqualTo(LoginName);
         List<User> list = userMapper.selectByExample(userExample);
         return CollectionUtils.isEmpty(list)?null:list.get(0);
+    }
+
+    /**
+     * 修改密码
+     * @param req
+     */
+    public void resetPassword(UserResetPasswordReq req) {
+        User user = CopyUtil.copy(req, User.class);
+        userMapper.updateByPrimaryKeySelective(user);
     }
 }
