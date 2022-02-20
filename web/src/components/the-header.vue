@@ -12,7 +12,8 @@
       <a-menu-item key="/admin/ebook"><router-link to="/admin/ebook">电子书管理</router-link></a-menu-item>
       <a-menu-item key="/admin/category"><router-link to="/admin/category">分类管理</router-link></a-menu-item>
       <a-menu-item key="/about"><router-link to="/about">关于我们</router-link></a-menu-item>
-      <a-menu-item @click="showLoginModel"><span>登录</span></a-menu-item>
+      <a-menu-item v-if="!!user.name"><span>用户:{{user.name}}</span></a-menu-item>
+      <a-menu-item v-if="!user.name" @click="showLoginModel"><span>登录</span></a-menu-item>
 
     </a-menu>
   </a-layout-header>
@@ -38,6 +39,7 @@
 import {defineComponent, ref} from 'vue';
 import axios from "axios";
 import {message} from "ant-design-vue";
+import store from "@/store";
 declare let hexMd5: any;
 declare let KEY: any;
 export default defineComponent({
@@ -46,8 +48,12 @@ export default defineComponent({
     const modalVisible = ref(false);
     const modalLoading = ref(false);
     const loginUser = ref();
+    const user = ref();
+    user.value = {};
+
     loginUser.value = {};
     const showLoginModel = ()=> {
+      loginUser.value.password = null;
       modalVisible.value = true;
     }
 
@@ -62,7 +68,9 @@ export default defineComponent({
         if(!data.success) {
           message.error(data.message);
         }else {
-          message.success("登录成功")
+          message.success("登录成功");
+          user.value = data.content;
+          store.commit("setUser", user.value);
         }
         modalLoading.value = false;
       });
@@ -73,7 +81,8 @@ export default defineComponent({
       showLoginModel,
       modalLoading,
       Login,
-      loginUser
+      loginUser,
+      user
     };
   }
 });
