@@ -7,9 +7,11 @@ import com.kk.wiki.domain.UserExample;
 import com.kk.wiki.exception.BusinessException;
 import com.kk.wiki.exception.BusinessExceptionCode;
 import com.kk.wiki.mapper.UserMapper;
+import com.kk.wiki.req.UserLoginReq;
 import com.kk.wiki.req.UserQueryReq;
 import com.kk.wiki.req.UserResetPasswordReq;
 import com.kk.wiki.req.UserSaveReq;
+import com.kk.wiki.resp.UserLoginResp;
 import com.kk.wiki.resp.UserQueryResp;
 import com.kk.wiki.resp.PageResp;
 import com.kk.wiki.utils.CopyUtil;
@@ -95,5 +97,23 @@ public class UserService {
     public void resetPassword(UserResetPasswordReq req) {
         User user = CopyUtil.copy(req, User.class);
         userMapper.updateByPrimaryKeySelective(user);
+    }
+
+    public UserLoginResp login(UserLoginReq req) {
+        User userBD = selectByLoginName(req.getLoginName());
+        if(ObjectUtils.isEmpty(userBD)) {
+
+            // 用户不存在
+            throw new BusinessException(BusinessExceptionCode.LOGIN_USER_ERROR);
+        }else {
+            if(userBD.getPassword().equals(req.getPassword())) {
+                // 登录成功
+                UserLoginResp userLoginResp = CopyUtil.copy(userBD, UserLoginResp.class);
+                return userLoginResp;
+            }else {
+                // 密码错误
+                throw new BusinessException(BusinessExceptionCode.LOGIN_USER_ERROR);
+            }
+        }
     }
 }
