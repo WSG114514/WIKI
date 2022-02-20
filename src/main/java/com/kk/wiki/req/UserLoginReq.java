@@ -2,14 +2,16 @@ package com.kk.wiki.req;
 
 import org.hibernate.validator.constraints.Length;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 public class UserLoginReq {
 
-    @NotNull(message = "【用户名】不能为空")
+    // NotNull 校验null, NotEmpty 校验null和""
+    @NotEmpty(message = "【用户名】不能为空")
     private String loginName;
 
-    @NotNull(message = "【密码】不能为空")
+    @NotEmpty(message = "【密码】不能为空")
     @Length(min = 6, max = 32, message = "【密码】规则不正确")
     private String password;
 
