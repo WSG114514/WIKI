@@ -115,4 +115,7 @@ public class DocService {
         return ObjectUtils.isEmpty(content)?"":content.getContent();
     }
 
+    public void updataVote(Long id) {
+        docMapperCust.updataVoteCount(id);
+    }
 }

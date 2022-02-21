@@ -15,7 +15,23 @@
           </a-tree>
         </a-col>
         <a-col :span="18">
+          <div>
+            <h2>{{doc.name}}</h2>
+            <div>
+              <span>阅读数: {{doc.viewCount}}</span>&nbsp;&nbsp;
+              <span>点赞数: {{doc.voteCount}}</span>
+            </div>
+            <a-divider style="height: 2px; background-color: #72a9e2" />
+          </div>
           <div :innerHTML="html" class="wangeditor"></div>
+          <div style="text-align: center">
+            <a-button type="primary" shape="round" :size="size" @click="LikeClick">
+              <template #icon>
+                <LikeOutlined />
+                点赞: {{doc.voteCount}}
+              </template>
+            </a-button>
+          </div>
         </a-col>
       </a-row>
     </a-layout-content>
@@ -33,6 +49,8 @@ export default defineComponent({
   name: 'Doc',
   setup() {
     const docs = ref();
+    const doc = ref();
+    doc.value = {};
     const level1 = ref();
     level1.value = [];
     // 通过route可以得到各种信息
@@ -55,6 +73,7 @@ export default defineComponent({
           level1.value = [];
           level1.value = Tool.array2Tree(docs.value, 0);
           if(Tool.isNotEmpty(level1)) {
+            doc.value = level1.value[0];
             defaultSelectedKeys.value = [level1.value[0].id];
             handleQueryContent(level1.value[0].id);
           }
@@ -83,9 +102,21 @@ export default defineComponent({
       console.log('selected', selectedKeys, info);
       if (Tool.isNotEmpty(selectedKeys)) {
         // 加载内容
+        doc.value = info.selectedNodes[0].props;
         handleQueryContent(selectedKeys[0]);
       }
     }
+
+    const LikeClick = ()=> {
+      axios.get("/doc/vote/" + doc.value.id).then((response)=> {
+        const data = response.data;
+        if(data.success) {
+          doc.value.voteCount++;
+        }else {
+          message.error(data.message);
+        }
+      });
+    };
 
     onMounted(()=> {
       handleQuery({
@@ -96,7 +127,9 @@ export default defineComponent({
       level1,
       html,
       onSelect,
-      defaultSelectedKeys
+      defaultSelectedKeys,
+      doc,
+      LikeClick
     };
   },
   components: {
