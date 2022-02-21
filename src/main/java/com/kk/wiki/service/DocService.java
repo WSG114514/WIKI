@@ -7,6 +7,7 @@ import com.kk.wiki.domain.Doc;
 import com.kk.wiki.domain.DocExample;
 import com.kk.wiki.mapper.ContentMapper;
 import com.kk.wiki.mapper.DocMapper;
+import com.kk.wiki.mapper.DocMapperCust;
 import com.kk.wiki.req.DocQueryReq;
 import com.kk.wiki.req.DocSaveReq;
 import com.kk.wiki.resp.DocQueryResp;
@@ -26,6 +27,8 @@ public class DocService {
 
     @Resource
     private DocMapper docMapper;
+    @Resource
+    private DocMapperCust docMapperCust;
     @Resource
     private ContentMapper contentMapper;
     @Resource
@@ -77,6 +80,8 @@ public class DocService {
         Content content = CopyUtil.copy(req, Content.class);
         if (ObjectUtils.isEmpty(req.getId())) {
             // 新增
+            doc.setViewCount(0);
+            doc.setVoteCount(0);
             doc.setId(snowFlake.nextId());
             docMapper.insert(doc);
             content.setId(doc.getId());
@@ -105,6 +110,9 @@ public class DocService {
 
     public String findContent(Long id) {
         Content content = contentMapper.selectByPrimaryKey(id);
+        // 文档阅读数+1
+        docMapperCust.updataViewCount(id);
         return ObjectUtils.isEmpty(content)?"":content.getContent();
     }
+
 }
