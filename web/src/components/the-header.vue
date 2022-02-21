@@ -12,7 +12,7 @@
       <a-menu-item key="/admin/ebook"><router-link to="/admin/ebook">电子书管理</router-link></a-menu-item>
       <a-menu-item key="/admin/category"><router-link to="/admin/category">分类管理</router-link></a-menu-item>
       <a-menu-item key="/about"><router-link to="/about">关于我们</router-link></a-menu-item>
-      <a-menu-item v-if="!!user.name"><span>用户:{{user.name}}</span></a-menu-item>
+      <a-menu-item v-if="!!user.name" @click="showDrawer"><span>用户:  {{user.name}}</span></a-menu-item>
       <a-menu-item v-if="!user.name" @click="showLoginModel"><span>登录</span></a-menu-item>
 
     </a-menu>
@@ -33,10 +33,30 @@
       </a-form-item>
     </a-form>
   </a-modal>
+
+  <a-drawer
+      title="欢迎回来"
+      placement="right"
+      :closable="false"
+      v-model:visible="visible"
+      :after-visible-change="afterVisibleChange"
+  >
+    <p>Some contents...</p>
+    <p>Some contents...</p>
+    <a-popconfirm
+        title="确认退出登录?"
+        ok-text="Yes"
+        cancel-text="No"
+        @confirm="logOut"
+        @cancel="cancel"
+    >
+      <a>退出登录</a>
+    </a-popconfirm>
+  </a-drawer>
 </template>
 
 <script lang="ts">
-import {defineComponent, ref} from 'vue';
+import {computed, defineComponent, ref} from 'vue';
 import axios from "axios";
 import {message} from "ant-design-vue";
 import store from "@/store";
@@ -48,8 +68,10 @@ export default defineComponent({
     const modalVisible = ref(false);
     const modalLoading = ref(false);
     const loginUser = ref();
-    const user = ref();
-    user.value = {};
+    const user = computed( ()=> {
+      return store.state.user;
+    });
+    const visible = ref<boolean>(false);
 
     loginUser.value = {};
     const showLoginModel = ()=> {
@@ -57,8 +79,11 @@ export default defineComponent({
       modalVisible.value = true;
     }
 
+    const showDrawer = () => {
+      visible.value = true;
+    };
+
     const Login =()=> {
-      debugger;
       console.log("开始登录");
       modalLoading.value = true;
       loginUser.value.password = hexMd5(loginUser.value.password + KEY);
@@ -69,11 +94,24 @@ export default defineComponent({
           message.error(data.message);
         }else {
           message.success("登录成功");
-          user.value = data.content;
-          store.commit("setUser", user.value);
+          store.commit("setUser", data.content);
         }
         modalLoading.value = false;
       });
+    }
+
+    const logOut = ()=> {
+      console.log("退出登录");
+      axios.get("/user/logout/" + user.value.token).then((response)=> {
+        const data = response.data;
+        if(!data.success) {
+          message.error(data.message);
+        }else {
+          message.success("用户退出成功");
+          store.commit('setUser', {});
+          visible.value = false;
+        }
+      })
     }
 
     return {
@@ -82,7 +120,10 @@ export default defineComponent({
       modalLoading,
       Login,
       loginUser,
-      user
+      user,
+      visible,
+      showDrawer,
+      logOut
     };
   }
 });

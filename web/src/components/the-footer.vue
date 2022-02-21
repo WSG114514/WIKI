@@ -1,7 +1,7 @@
 <template>
   <a-layout-footer style="text-align: center">
     Ant wiki ©2022 Created by Conner
-    <span v-if="!!user.name">登录用户: {{user.name}}</span>
+    <span v-if="!!user.name">登录用户:   {{user.name}}</span>
   </a-layout-footer>
 </template>
 
