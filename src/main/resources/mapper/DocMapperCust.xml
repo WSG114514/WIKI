@@ -8,4 +8,12 @@
   <update id="updataVoteCount">
     update doc set vote_count = vote_count + 1 where id = #{id}
   </update>
+
+  <update id="updataEbookInfo">
+    UPDATE ebook e1, (SELECT ebook_id, COUNT(1) doc_count, SUM(view_count) view_count, SUM(vote_count) vote_count FROM doc GROUP BY ebook_id) e2
+       SET e1.doc_count = e2.doc_count,
+           e1.view_count = e2.view_count,
+           e1.vote_count = e2.vote_count
+     WHERE e1.id = e2.ebook_id
+  </update>
 </mapper>

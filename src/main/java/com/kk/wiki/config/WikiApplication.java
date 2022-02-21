@@ -7,6 +7,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.env.Environment;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 //手动设置spring扫描范围
@@ -14,6 +15,8 @@ import org.springframework.core.env.Environment;
 //可设置多个包例如：@ComponentScan({"com.kk.wiki", "com.test"})
 //设置mapper扫描包
 @MapperScan("com.kk.wiki.mapper")
+//开启定时任务
+@EnableScheduling
 public class WikiApplication {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WikiApplication.class);

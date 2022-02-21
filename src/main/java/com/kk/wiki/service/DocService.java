@@ -5,6 +5,8 @@ import com.github.pagehelper.PageInfo;
 import com.kk.wiki.domain.Content;
 import com.kk.wiki.domain.Doc;
 import com.kk.wiki.domain.DocExample;
+import com.kk.wiki.exception.BusinessException;
+import com.kk.wiki.exception.BusinessExceptionCode;
 import com.kk.wiki.mapper.ContentMapper;
 import com.kk.wiki.mapper.DocMapper;
 import com.kk.wiki.mapper.DocMapperCust;
@@ -13,6 +15,8 @@ import com.kk.wiki.req.DocSaveReq;
 import com.kk.wiki.resp.DocQueryResp;
 import com.kk.wiki.resp.PageResp;
 import com.kk.wiki.utils.CopyUtil;
+import com.kk.wiki.utils.RedisUtil;
+import com.kk.wiki.utils.RequestContext;
 import com.kk.wiki.utils.SnowFlake;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -33,6 +37,8 @@ public class DocService {
     private ContentMapper contentMapper;
     @Resource
     private SnowFlake snowFlake;
+    @Resource
+    private  RedisUtil redisUtil;
 
     public PageResp<DocQueryResp> list(DocQueryReq req) {
 
@@ -115,7 +121,21 @@ public class DocService {
         return ObjectUtils.isEmpty(content)?"":content.getContent();
     }
 
+    /**
+     * 点赞
+     * @param id
+     */
     public void updataVote(Long id) {
-        docMapperCust.updataVoteCount(id);
+        // docMapperCust.updataVoteCount(id);
+        String key = RequestContext.getRemoteAddr();
+        if (redisUtil.validateRepeat("DOC_VOTE" + id + "_" + key, 3600*24)) {
+            docMapperCust.updataVoteCount(id);
+        }else {
+            throw new BusinessException(BusinessExceptionCode.VOTE_REPEAT);
+        }
+    }
+
+    public void updataEbookInfo() {
+        docMapperCust.updataEbookInfo();
     }
 }
