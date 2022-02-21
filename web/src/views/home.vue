@@ -32,9 +32,17 @@
         <template #renderItem="{ item }">
           <a-list-item key="item.name">
             <template #actions>
-          <span v-for="{ type, text } in actions" :key="type">
-            <component v-bind:is="type" style="margin-right: 8px" />
-            {{ text }}
+          <span>
+            <component v-bind:is="'LikeOutlined'" style="margin-right: 8px" />
+            {{ item.voteCount }}
+          </span>
+          <span>
+            <component v-bind:is="'UserOutlined'" style="margin-right: 8px" />
+            {{ item.viewCount }}
+          </span>
+          <span>
+            <component v-bind:is="'FileTextOutlined'" style="margin-right: 8px" />
+            {{ item.docCount }}
           </span>
             </template>
 
@@ -71,8 +79,6 @@ for (let i = 0; i < 23; i++) {
         'We supply a series of design principles, practical patterns and high quality design resources (Sketch and Axure), to help people create their product prototypes beautifully and efficiently.',
   });
 }
-
-
 
 export default defineComponent({
   name: 'Home',
@@ -131,12 +137,6 @@ export default defineComponent({
       pageSize: 3,
     };
 
-    const actions: Record<string, string>[] = [
-      { type: 'StarOutlined', text: '156' },
-      { type: 'LikeOutlined', text: '156' },
-      { type: 'MessageOutlined', text: '2' },
-    ];
-
     onMounted(()=> {
       handleQueryCategory();
       handleQueryEbook();
@@ -146,7 +146,6 @@ export default defineComponent({
       ebooks,
       books: toRef(ebooks1, "books"),
       listData,
-      actions,
       pagination,
       level1,
       handleClick,
