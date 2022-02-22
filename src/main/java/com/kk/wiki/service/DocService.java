@@ -19,6 +19,7 @@ import com.kk.wiki.utils.RedisUtil;
 import com.kk.wiki.utils.RequestContext;
 import com.kk.wiki.utils.SnowFlake;
 import com.kk.wiki.webSocketServer.WebSocketServer;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -139,7 +140,8 @@ public class DocService {
         
         // 推送消息
         Doc docBD = docMapper.selectByPrimaryKey(id);
-        wsService.sendInfo("【" + docBD.getName() + "】被点赞!");
+        String logId = MDC.get("LOG_ID");
+        wsService.sendInfo("【" + docBD.getName() + "】被点赞!", logId);
     }
 
     public void updataEbookInfo() {
