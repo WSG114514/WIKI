@@ -19,8 +19,10 @@ import com.kk.wiki.utils.RedisUtil;
 import com.kk.wiki.utils.RequestContext;
 import com.kk.wiki.utils.SnowFlake;
 import com.kk.wiki.webSocketServer.WebSocketServer;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -43,6 +45,8 @@ public class DocService {
     private RedisUtil redisUtil;
     @Resource
     private WsService wsService;
+    @Resource
+    private RocketMQTemplate rocketMQTemplate;
 
     public PageResp<DocQueryResp> list(DocQueryReq req) {
 
@@ -85,6 +89,7 @@ public class DocService {
     /**
      * 保存
      */
+    @Transactional
     public void save(DocSaveReq req) {
         Doc doc = CopyUtil.copy(req, Doc.class);
         Content content = CopyUtil.copy(req, Content.class);
@@ -142,6 +147,8 @@ public class DocService {
         Doc docBD = docMapper.selectByPrimaryKey(id);
         String logId = MDC.get("LOG_ID");
         wsService.sendInfo("【" + docBD.getName() + "】被点赞!", logId);
+        //MQ发送方
+//        rocketMQTemplate.convertAndSend("VOTE_TOPIC", "【" + docBD.getName() + "】被点赞!");
     }
 
     public void updataEbookInfo() {
