@@ -18,6 +18,7 @@ import com.kk.wiki.utils.CopyUtil;
 import com.kk.wiki.utils.RedisUtil;
 import com.kk.wiki.utils.RequestContext;
 import com.kk.wiki.utils.SnowFlake;
+import com.kk.wiki.webSocketServer.WebSocketServer;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -38,7 +39,9 @@ public class DocService {
     @Resource
     private SnowFlake snowFlake;
     @Resource
-    private  RedisUtil redisUtil;
+    private RedisUtil redisUtil;
+    @Resource
+    private WebSocketServer webSocketServer;
 
     public PageResp<DocQueryResp> list(DocQueryReq req) {
 
@@ -133,6 +136,10 @@ public class DocService {
         }else {
             throw new BusinessException(BusinessExceptionCode.VOTE_REPEAT);
         }
+        
+        // 推送消息
+        Doc docBD = docMapper.selectByPrimaryKey(id);
+        webSocketServer.sendInfo("【" + docBD.getName() + "】被点赞!");
     }
 
     public void updataEbookInfo() {
