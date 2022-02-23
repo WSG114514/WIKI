@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kk.wiki.mapper.EbookSnapshotMapperCust">
+
+    <update id="genSnapshot">
+        INSERT INTO `wiki`.`ebook_snapshot` ( `ebook_id`, `date`, `view_count`, `vote_count`, `view_increase`, `vote_increase` )
+            (SELECT t1.id, CURDATE(), 0, 0, 0, 0
+               FROM ebook t1
+              WHERE NOT EXISTS (
+                        SELECT *
+                          FROM ebook_snapshot t2
+                         WHERE t1.id = t2.ebook_id
+                           AND t2.`date` = CURDATE()));
+
+        UPDATE ebook_snapshot t1, ebook t2
+           SET t1.view_count = t2.view_count, t1.vote_count = t2.vote_count
+         WHERE t1.`date` = CURDATE() AND t1.ebook_id = t2.id;
+
+        UPDATE ebook_snapshot t1
+            LEFT JOIN (SELECT ebook_id, view_count, vote_count
+            FROM ebook_snapshot
+            WHERE `date` = DATE_SUB(CURDATE(),INTERVAL 1 day)) t2 ON t1.ebook_id = t2.ebook_id
+            SET t1.view_increase = (t1.view_count - IFNULL(t2.view_count, 0)),
+                t1.vote_increase = (t1.vote_count - IFNULL(t2.vote_count, 0))
+        WHERE t1.`date` = CURDATE()
+    </update>
+
+    <select id="getStatistic" resultType="com.kk.wiki.resp.StatisticResp">
+        select
+               t1.`date` as `date`
+               ,SUM(t1.view_count) as viewCount
+               ,SUM(t1.vote_count) as voteCount
+               ,SUM(t1.view_increase) as viewIncrease
+               ,SUM(t1.vote_increase) as voteIncrease
+           FROM
+                ebook_snapshot t1
+          WHERE
+                t1.`date` >= date_sub(curdate(), interval 1 day)
+          GROUP BY
+                t1.`date`
+          ORDER BY
+                t1.`date` asc;
+    </select>
+</mapper>
