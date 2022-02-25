@@ -21,7 +21,7 @@ public class EbookSnapshotJob {
     @Resource
     private SnowFlake snowFlake;
 
-    @Scheduled(cron = "0 0 0/1 * * ? ")
+    @Scheduled(cron = "* 0/3 * * * ? ")
     private void genSnapshot() {
         MDC.put("LOG_ID", String.valueOf(snowFlake.nextId()));
         LOG.info("生成电子书快照开始");
